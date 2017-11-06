@@ -175,7 +175,12 @@ func VPA_Serialize(vpia []VPInstr, blk *codegenfw.Block, ssa *uint) {
 			A := erDecode(erPop(&stack))
 			blk.Childs.PushBack(codegenfw.NewOp("(("+instr.Text+")%v)",lssa,A))
 			stack = append(stack,codegenfw.NewExprRef(lssa)); lssa++
-		case cparse.E_CONDITIONAL:   panic("Don't")
+		case cparse.E_CONDITIONAL:
+			C := erDecode(erPop(&stack))
+			B := erDecode(erPop(&stack))
+			A := erDecode(erPop(&stack))
+			blk.Childs.PushBack(codegenfw.NewOp("(%v?%v:%v)",lssa,A,B,C))
+			stack = append(stack,codegenfw.NewExprRef(lssa)); lssa++
 		default: panic("Don't (2)")
 		}
 	}
