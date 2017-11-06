@@ -28,6 +28,7 @@ package ctransform
 import "github.com/byte-mug/semiparse/cparse"
 import "github.com/byte-mug/codegenfw"
 import "fmt"
+import "strings"
 
 type VPInstr struct{
 	Type uint
@@ -130,12 +131,12 @@ func VPA_Serialize(vpia []VPInstr, blk *codegenfw.Block, ssa *uint) {
 			blk.Childs.PushBack(codegenfw.NewOp("(%v)->"+instr.Text,lssa,erDecode(erPop(&stack))))
 			stack = append(stack,codegenfw.NewExprRef(lssa)); lssa++
 		case cparse.E_UNARY_OP:
-			blk.Childs.PushBack(codegenfw.NewOp("("+instr.Text+"%v)",lssa,erDecode(erPop(&stack))))
+			blk.Childs.PushBack(codegenfw.NewOp("("+strings.Replace(instr.Text,"%","%%",-1)+"%v)",lssa,erDecode(erPop(&stack))))
 			stack = append(stack,codegenfw.NewExprRef(lssa)); lssa++
 		case cparse.E_BINARY_OP,cparse.E_COMPARE:
 			B := erDecode(erPop(&stack))
 			A := erDecode(erPop(&stack))
-			blk.Childs.PushBack(codegenfw.NewOp("(%v"+instr.Text+"%v)",lssa,A,B))
+			blk.Childs.PushBack(codegenfw.NewOp("(%v"+strings.Replace(instr.Text,"%","%%",-1)+"%v)",lssa,A,B))
 			stack = append(stack,codegenfw.NewExprRef(lssa)); lssa++
 		case cparse.E_ASSIGN:
 			if instr.Text!="" {
@@ -156,12 +157,12 @@ func VPA_Serialize(vpia []VPInstr, blk *codegenfw.Block, ssa *uint) {
 		case cparse.E_BINARY_OP_ASSIGN:
 			B := erDecode(erPop(&stack))
 			A := erDecode(erPop(&stack))
-			blk.Childs.PushBack(codegenfw.NewOp("(%v"+instr.Text+"=%v)",lssa,A,B))
+			blk.Childs.PushBack(codegenfw.NewSE("%v"+strings.Replace(instr.Text,"%","%%",-1)+"=%v",lssa,A,B))
 			stack = append(stack,codegenfw.NewExprRef(lssa)); lssa++
 		case cparse.E_INDEX:
 			B := erDecode(erPop(&stack))
 			A := erDecode(erPop(&stack))
-			blk.Childs.PushBack(codegenfw.NewOp("(%v)[%v]",lssa,A,B))
+			blk.Childs.PushBack(codegenfw.NewOp("%v[%v]",lssa,A,B))
 			stack = append(stack,codegenfw.NewExprRef(lssa)); lssa++
 		case cparse.E_FUNCTION_CALL:
 			{
